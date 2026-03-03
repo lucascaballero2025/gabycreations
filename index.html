@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gaby Creations | Tienda Oficial</title>
+    <style>
+        :root {
+            --principal: #2c3e50;
+            --acento: #e67e22;
+            --fondo: #f4f7f6;
+            --blanco: #ffffff;
+            --gris: #7f8c8d;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--fondo); color: var(--principal); -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        
+        header { background: var(--blanco); padding: 10px 5%; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top:0; z-index: 100; }
+        .header-top { display: flex; justify-content: space-between; width: 100%; align-items: center; max-width: 1200px; }
+        .logo { font-family: 'Brush Script MT', cursive; font-size: 2.2rem; color: var(--acento); text-decoration: none; }
+        
+        nav { margin-top: 15px; border-top: 1px solid #eee; width: 100%; padding-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        nav span { cursor: pointer; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--gris); padding: 8px 12px; border-radius: 20px; transition: 0.3s; background: #fff; border: 1px solid #eee; }
+        nav span:hover { background: var(--acento); color: white; }
+
+        .cart-icon { cursor: pointer; position: relative; font-size: 1.6rem; padding: 5px; }
+        .cart-count { position: absolute; top: 0; right: -5px; background: #e74c3c; color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 50%; font-weight: bold; }
+
+        .container { padding: 20px 5%; min-height: 80vh; max-width: 1200px; margin: auto; }
+        
+        /* GRILLA */
+        .grid { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; } }
+
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; display: flex; flex-direction: column; height: 100%; }
+        .card img { width: 100%; height: 160px; object-fit: cover; }
+        @media (min-width: 768px) { .card img { height: 200px; } }
+        .card-info { padding: 12px; text-align: center; }
+
+        /* MODALES */
+        .modal-full { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 15px; box-sizing: border-box; }
+        .btn-back { background: #eee; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 20px; width: 100%; max-width: 200px; }
+        
+        .detalle-container { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: auto; }
+        @media (min-width: 768px) { .detalle-container { flex-direction: row; align-items: flex-start; gap: 40px; } }
+        .detalle-img { width: 100%; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); object-fit: cover; }
+        @media (min-width: 768px) { .detalle-img { max-width: 450px; } }
+
+        /* CONTROLES DE CANTIDAD */
+        .qty-box { display: flex; align-items: center; gap: 15px; margin: 20px 0; background: #f0f0f0; padding: 10px; border-radius: 10px; width: fit-content; }
+        .btn-qty { width: 40px; height: 40px; border: none; background: var(--blanco); border-radius: 50%; cursor: pointer; font-size: 1.3rem; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-qty:disabled { opacity: 0.3; }
+
+        /* CARRITO */
+        .cart-item { display: flex; flex-direction: column; background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #eee; }
+        @media (min-width: 500px) { .cart-item { flex-direction: row; justify-content: space-between; align-items: center; } }
+
+        .form-compra { background: #f9f9f9; padding: 20px; border-radius: 12px; border: 1px solid #ddd; margin-top: 20px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        
+        .btn { background: var(--acento); color: white; border: none; padding: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
+
+        .admin-dot { position: fixed; bottom: 10px; right: 10px; width: 15px; height: 15px; background: #ccc; border-radius: 50%; opacity: 0.2; z-index: 2000; }
+        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); margin-top: 30px; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <a href="#" onclick="renderHome()" class="logo">Gaby Creations</a>
+        <div class="cart-icon" onclick="toggleCart()">
+            🛒<span class="cart-count" id="cart-count">0</span>
+        </div>
+    </div>
+    <nav id="menu-categorias">
+        <span onclick="filterCat('Todos')">Todos</span>
+        <span onclick="filterCat('Manualidades')">Manualidades</span>
+        <span onclick="filterCat('Tecnología')">Tecnología</span>
+        <span onclick="filterCat('Accesorios')">Accesorios</span>
+    </nav>
+</header>
+
+<div class="container" id="main-view"></div>
+
+<div id="modal-detalle" class="modal-full">
+    <button class="btn-back" onclick="closeModals()">← Volver</button>
+    <div id="detalle-content" class="detalle-container"></div>
+</div>
+
+<div id="modal-carrito" class="modal-full">
+    <button class="btn-back" onclick="closeModals()">← Seguir comprando</button>
+    <div style="max-width: 600px; margin: auto;">
+        <h2>Tu Carrito</h2>
+        <div id="cart-list"></div>
+        <h3 style="text-align: right; margin: 20px 0;">Total: $<span id="cart-total">0</span></h3>
+        
+        <div class="form-compra">
+            <h3>Finalizar Pedido</h3>
+            <input type="text" id="f-nombre" placeholder="Nombre">
+            <input type="text" id="f-apellido" placeholder="Apellido">
+            <input type="text" id="f-ci" placeholder="Cédula de Identidad">
+            <input type="text" id="f-tel" placeholder="Celular">
+            <div style="font-size: 0.85rem; color: #555; background: #fff3cd; padding: 12px; border-radius: 8px; margin: 10px 0;">
+                📍 Retiro: Balneario El Ensueño, Calle Bohanes 5373.<br>
+                🚛 Envíos a todo el país coordinados por WhatsApp.
+            </div>
+            <button class="btn" onclick="sendWhatsApp()">Confirmar por WhatsApp</button>
+        </div>
+    </div>
+</div>
+
+<div class="admin-dot" onclick="authAdmin()"></div>
+<div id="admin-panel" class="panel-admin container">
+    <h2 id="admin-title">Agregar Nuevo Producto</h2>
+    <div id="form-admin">
+        <input type="hidden" id="p-id">
+        <input type="text" id="p-nom" placeholder="Nombre del producto">
+        <input type="number" id="p-pre" placeholder="Precio ($)">
+        <input type="number" id="p-stock" placeholder="Stock disponible">
+        <select id="p-cat">
+            <option value="Manualidades">Manualidades</option>
+            <option value="Tecnología">Tecnología</option>
+            <option value="Accesorios">Accesorios</option>
+        </select>
+        <input type="text" id="p-img" placeholder="URL de Imagen (Link)">
+        <textarea id="p-desc" placeholder="Descripción breve..."></textarea>
+        <button class="btn" onclick="saveProduct()">Guardar Producto</button>
+        <button class="btn" style="background:#95a5a6; margin-top:5px;" onclick="resetAdminForm()">Limpiar Formulario</button>
+    </div>
+    
+    <h3 style="margin-top: 30px;">Productos Publicados</h3>
+    <div id="admin-list"></div>
+</div>
+
+<script>
+    let productos = JSON.parse(localStorage.getItem('gaby_db_v5')) || [
+        {id: 1, nombre: "Matera Cuero", precio: 1500, stock: 5, cat: "Manualidades", img: "https://via.placeholder.com/400", desc: "Matera artesanal personalizada."},
+        {id: 2, nombre: "Funda iPhone", precio: 600, stock: 8, cat: "Accesorios", img: "https://via.placeholder.com/400", desc: "Funda reforzada."}
+    ];
+    let carrito = [];
+    let tempQty = 1;
+
+    function renderHome(lista = productos) {
+        const view = document.getElementById('main-view');
+        view.innerHTML = `<div class="grid" id="prod-grid"></div>`;
+        lista.forEach(p => {
+            document.getElementById('prod-grid').innerHTML += `
+                <div class="card" onclick="openDetail(${p.id})">
+                    <img src="${p.img}">
+                    <div class="card-info">
+                        <strong>${p.nombre}</strong>
+                        <span style="color:var(--acento); font-weight:bold">$${p.precio}</span><br>
+                        <small>Stock: ${p.stock}</small>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function filterCat(cat) { cat === 'Todos' ? renderHome() : renderHome(productos.filter(p => p.cat === cat)); }
+
+    function openDetail(id) {
+        const p = productos.find(x => x.id === id);
+        tempQty = 1; // Reset cantidad al abrir
+        document.getElementById('modal-detalle').style.display = 'block';
+        updateDetailHTML(p);
+    }
+
+    function updateDetailHTML(p) {
+        document.getElementById('detalle-content').innerHTML = `
+            <img src="${p.img}" class="detalle-img">
+            <div style="flex:1">
+                <h1>${p.nombre}</h1>
+                <p style="color:var(--gris)">${p.desc}</p>
+                <h2 style="color:var(--acento)">$${p.precio}</h2>
+                <p>Disponibles: ${p.stock}</p>
+                
+                ${p.stock > 0 ? `
+                    <div class="qty-box">
+                        <button class="btn-qty" onclick="updateTempQty(-1, ${p.stock})">-</button>
+                        <b id="temp-qty-val" style="font-size:1.2rem">${tempQty}</b>
+                        <button class="btn-qty" onclick="updateTempQty(1, ${p.stock})">+</button>
+                    </div>
+                    <button class="btn" onclick="addToCart(${p.id})">Agregar ${tempQty} al Carrito</button>
+                ` : '<h3 style="color:red">Sin Stock Temporalmente</h3>'}
+            </div>`;
+    }
+
+    function updateTempQty(delta, max) {
+        if(tempQty + delta >= 1 && tempQty + delta <= max) {
+            tempQty += delta;
+            document.getElementById('temp-qty-val').innerText = tempQty;
+            // Actualizar texto del botón para que sea claro
+            const pId = productos.find(x => x.stock === max).id; // Un poco hacky pero funciona
+            document.querySelector('#detalle-content .btn').innerText = `Agregar ${tempQty} al Carrito`;
+        }
+    }
+
+    function addToCart(id) {
+        const p = productos.find(x => x.id === id);
+        const exist = carrito.find(x => x.id === id);
+        if(exist) {
+            if(exist.qty + tempQty <= p.stock) exist.qty += tempQty;
+            else return alert("No puedes agregar más del stock disponible");
+        } else {
+            carrito.push({...p, qty: tempQty});
+        }
+        updateCartUI();
+        closeModals();
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cart-list');
+        let total = 0, itemsCount = 0;
+        list.innerHTML = "";
+        carrito.forEach((item, index) => {
+            const original = productos.find(p => p.id === item.id);
+            total += item.precio * item.qty;
+            itemsCount += item.qty;
+            list.innerHTML += `
+                <div class="cart-item">
+                    <div><b>${item.nombre}</b><br><small>$${item.precio} c/u</small></div>
+                    <div class="qty-controls">
+                        <button class="btn-qty" onclick="changeQty(${index}, -1)">-</button>
+                        <b>${item.qty}</b>
+                        <button class="btn-qty" onclick="changeQty(${index}, 1)" ${item.qty >= original.stock ? 'disabled' : ''}>+</button>
+                        <span style="margin-left:10px; font-weight:bold">$${item.precio * item.qty}</span>
+                        <button onclick="removeItem(${index})" style="border:none; background:none; cursor:pointer; font-size:1.2rem; margin-left:10px">🗑</button>
+                    </div>
+                </div>`;
+        });
+        document.getElementById('cart-count').innerText = itemsCount;
+        document.getElementById('cart-total').innerText = total;
+    }
+
+    function changeQty(idx, delta) {
+        const item = carrito[idx];
+        const original = productos.find(p => p.id === item.id);
+        if(delta === 1 && item.qty < original.stock) item.qty++;
+        else if(delta === -1 && item.qty > 1) item.qty--;
+        updateCartUI();
+    }
+
+    function removeItem(i) { carrito.splice(i, 1); updateCartUI(); }
+    function toggleCart() { document.getElementById('modal-carrito').style.display = 'block'; }
+    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
+
+    function sendWhatsApp() {
+        const n = document.getElementById('f-nombre').value, ci = document.getElementById('f-ci').value, tel = document.getElementById('f-tel').value;
+        if(!n || !ci || !tel || carrito.length === 0) return alert("Completa tus datos y revisa el carrito");
+        let txt = `*PEDIDO GABY CREATIONS*%0A*Cliente:* ${n}%0A*CI:* ${ci}%0A*Tel:* ${tel}%0A%0A*PRODUCTOS:*%0A`;
+        carrito.forEach(i => txt += `- ${i.nombre} x${i.qty} ($${i.precio * i.qty})%0A`);
+        txt += `%0A*TOTAL: $${document.getElementById('cart-total').innerText}*`;
+        window.open(`https://wa.me/59894492556?text=${txt}`);
+    }
+
+    // ADMIN
+    function authAdmin() { if(btoa(prompt("Clave:")) === "Z2FieTEyMw==") { document.getElementById('admin-panel').style.display='block'; renderAdminList(); window.scrollTo(0, document.body.scrollHeight); } }
+    
+    function saveProduct() {
+        const id = document.getElementById('p-id').value;
+        const pData = {
+            id: id ? parseInt(id) : Date.now(),
+            nombre: document.getElementById('p-nom').value,
+            precio: parseInt(document.getElementById('p-pre').value),
+            stock: parseInt(document.getElementById('p-stock').value),
+            cat: document.getElementById('p-cat').value,
+            img: document.getElementById('p-img').value || "https://via.placeholder.com/400",
+            desc: document.getElementById('p-desc').value
+        };
+        
+        if(!pData.nombre || !pData.precio) return alert("Faltan datos");
+
+        if(id) { 
+            productos[productos.findIndex(x => x.id == id)] = pData; 
+        } else { 
+            productos.push(pData); 
+        }
+        
+        localStorage.setItem('gaby_db_v5', JSON.stringify(productos));
+        resetAdminForm();
+        renderAdminList();
+        renderHome();
+        alert("¡Tienda actualizada!");
+    }
+
+    function renderAdminList() {
+        const list = document.getElementById('admin-list');
+        list.innerHTML = "";
+        productos.forEach(p => {
+            list.innerHTML += `<div class="admin-item">
+                <span>${p.nombre} ($${p.precio} | Stock: ${p.stock})</span>
+                <div>
+                    <button onclick="editP(${p.id})" style="cursor:pointer">📝</button> 
+                    <button onclick="deleteP(${p.id})" style="cursor:pointer; color:red">🗑</button>
+                </div>
+            </div>`;
+        });
+    }
+
+    function editP(id) {
+        const p = productos.find(x => x.id == id);
+        document.getElementById('p-id').value = p.id;
+        document.getElementById('p-nom').value = p.nombre;
+        document.getElementById('p-pre').value = p.precio;
+        document.getElementById('p-stock').value = p.stock;
+        document.getElementById('p-cat').value = p.cat;
+        document.getElementById('p-img').value = p.img;
+        document.getElementById('p-desc').value = p.desc;
+        document.getElementById('admin-title').innerText = "Editando: " + p.nombre;
+        
+        // Scroll suave al formulario en lugar de saltar arriba
+        document.getElementById('admin-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteP(id) { 
+        if(confirm("¿Eliminar este producto?")) { 
+            productos = productos.filter(x => x.id != id); 
+            localStorage.setItem('gaby_db_v5', JSON.stringify(productos)); 
+            renderAdminList(); 
+            renderHome(); 
+        } 
+    }
+
+    function resetAdminForm() {
+        document.getElementById('p-id').value = "";
+        document.getElementById('p-nom').value = "";
+        document.getElementById('p-pre').value = "";
+        document.getElementById('p-stock').value = "";
+        document.getElementById('p-img').value = "";
+        document.getElementById('p-desc').value = "";
+        document.getElementById('admin-title').innerText = "Agregar Nuevo Producto";
+    }
+
+    renderHome();
+</script>
+</body>
+</html>
