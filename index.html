@@ -34,7 +34,7 @@
         .btn-qty { width: 40px; height: 40px; border: none; background: var(--blanco); border-radius: 50%; cursor: pointer; font-size: 1.3rem; }
         .btn { background: var(--acento); color: white; border: none; padding: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
         .admin-dot { position: fixed; bottom: 10px; right: 10px; width: 15px; height: 15px; background: #ccc; border-radius: 50%; opacity: 0.2; z-index: 2000; }
-        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); margin-top: 30px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); margin-top: 30px; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
     </style>
 </head>
@@ -72,32 +72,30 @@
         <h3 style="text-align: right; margin: 20px 0;">Total: $<span id="cart-total">0</span></h3>
         <div class="form-compra">
             <input type="text" id="f-nombre" placeholder="Nombre completo">
-            <input type="text" id="f-ci" placeholder="Cédula de Identidad">
-            <button class="btn" onclick="sendWhatsApp()">Confirmar Pedido</button>
+            <button class="btn" onclick="sendWhatsApp()">Confirmar por WhatsApp</button>
         </div>
     </div>
 </div>
 
 <div class="admin-dot" onclick="authAdmin()"></div>
 <div id="admin-panel" class="panel-admin container">
-    <h2 id="admin-title">Panel de Administración</h2>
+    <h2>Panel Admin</h2>
     <input type="hidden" id="p-id">
-    <input type="text" id="p-nom" placeholder="Nombre del producto">
+    <input type="text" id="p-nom" placeholder="Nombre">
     <input type="number" id="p-pre" placeholder="Precio ($)">
-    <input type="number" id="p-stock" placeholder="Stock disponible">
+    <input type="number" id="p-stock" placeholder="Stock">
     <select id="p-cat">
         <option value="Manualidades">Manualidades</option>
         <option value="Tecnología">Tecnología</option>
         <option value="Accesorios">Accesorios</option>
     </select>
-    <input type="text" id="p-img" placeholder="URL de Imagen">
-    <textarea id="p-desc" placeholder="Descripción breve..."></textarea>
-    <button class="btn" onclick="saveProduct()">Guardar en la Nube</button>
+    <input type="text" id="p-img" placeholder="Link de imagen (Drive o Postimages)">
+    <textarea id="p-desc" placeholder="Descripción"></textarea>
+    <button class="btn" onclick="saveProduct()">Guardar Producto</button>
     <div id="admin-list" style="margin-top:20px;"></div>
 </div>
 
 <script>
-    // CONFIGURACIÓN DE FIREBASE (TUS CLAVES)
     const firebaseConfig = {
       apiKey: "AIzaSyCJI7RSjcJU0Ipvw7ZlKo-GMpAyDGkcgKQ",
       authDomain: "gaby-creations.firebaseapp.com",
@@ -115,7 +113,6 @@
     let carrito = [];
     let tempQty = 1;
 
-    // Escuchar cambios en tiempo real
     db.ref('productos').on('value', (snapshot) => {
         const data = snapshot.val();
         productos = data ? Object.values(data) : [];
@@ -126,16 +123,16 @@
     function renderHome(lista = productos) {
         const view = document.getElementById('main-view');
         if(productos.length === 0) {
-            view.innerHTML = `<h3 style="text-align:center; color:#999; margin-top:50px;">Aún no hay productos. Usa el panel admin para agregar uno.</h3>`;
+            view.innerHTML = `<h3 style="text-align:center; color:#999; margin-top:50px;">No hay productos cargados aún.</h3>`;
             return;
         }
         view.innerHTML = `<div class="grid" id="prod-grid"></div>`;
         lista.forEach(p => {
-            document.getElementById('prod-grid').innerHTML += `
+            view.querySelector('#prod-grid').innerHTML += `
                 <div class="card" onclick="openDetail(${p.id})">
-                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/400?text=Imagen+No+Disponible'">
+                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/400?text=Gaby+Creations'">
                     <div class="card-info">
-                        <strong>${p.nombre}</strong>
+                        <strong>${p.nombre}</strong><br>
                         <span style="color:var(--acento); font-weight:bold">$${p.precio}</span><br>
                         <small>Stock: ${p.stock}</small>
                     </div>
@@ -149,15 +146,11 @@
         const p = productos.find(x => x.id === id);
         tempQty = 1;
         document.getElementById('modal-detalle').style.display = 'block';
-        updateDetailHTML(p);
-    }
-
-    function updateDetailHTML(p) {
         document.getElementById('detalle-content').innerHTML = `
             <img src="${p.img}" class="detalle-img">
             <div style="flex:1">
                 <h1>${p.nombre}</h1>
-                <p style="color:var(--gris)">${p.desc}</p>
+                <p>${p.desc}</p>
                 <h2 style="color:var(--acento)">$${p.precio}</h2>
                 <p>Disponibles: ${p.stock}</p>
                 ${p.stock > 0 ? `
@@ -166,8 +159,8 @@
                         <b id="temp-qty-val">${tempQty}</b>
                         <button class="btn-qty" onclick="updateTempQty(1, ${p.stock})">+</button>
                     </div>
-                    <button class="btn" onclick="addToCart(${p.id})">Agregar ${tempQty} al Carrito</button>
-                ` : '<h3 style="color:red">Agotado</h3>'}
+                    <button class="btn" onclick="addToCart(${p.id})">Agregar al Carrito</button>
+                ` : '<h3 style="color:red">Sin Stock</h3>'}
             </div>`;
     }
 
@@ -175,7 +168,6 @@
         if(tempQty + delta >= 1 && tempQty + delta <= max) {
             tempQty += delta;
             document.getElementById('temp-qty-val').innerText = tempQty;
-            document.querySelector('#detalle-content .btn').innerText = `Agregar ${tempQty} al Carrito`;
         }
     }
 
@@ -184,7 +176,7 @@
         const exist = carrito.find(x => x.id === id);
         if(exist) {
             if(exist.qty + tempQty <= p.stock) exist.qty += tempQty;
-            else return alert("No hay más stock disponible");
+            else return alert("Stock superado");
         } else {
             carrito.push({...p, qty: tempQty});
         }
@@ -193,38 +185,33 @@
     }
 
     function updateCartUI() {
-        const list = document.getElementById('cart-list');
-        let total = 0, itemsCount = 0;
-        list.innerHTML = "";
+        let total = 0, count = 0;
+        document.getElementById('cart-list').innerHTML = "";
         carrito.forEach((item, index) => {
             total += item.precio * item.qty;
-            itemsCount += item.qty;
-            list.innerHTML += `
-                <div class="cart-item" style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                    <div><b>${item.nombre}</b><br>$${item.precio} x ${item.qty}</div>
-                    <button onclick="removeItem(${index})" style="background:none; border:none; cursor:pointer;">🗑</button>
+            count += item.qty;
+            document.getElementById('cart-list').innerHTML += `
+                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                    <span>${item.nombre} (x${item.qty})</span>
+                    <button onclick="removeItem(${index})">🗑</button>
                 </div>`;
         });
-        document.getElementById('cart-count').innerText = itemsCount;
+        document.getElementById('cart-count').innerText = count;
         document.getElementById('cart-total').innerText = total;
     }
 
     function removeItem(i) { carrito.splice(i,1); updateCartUI(); }
 
     function sendWhatsApp() {
-        if(carrito.length === 0) return;
         const n = document.getElementById('f-nombre').value;
-        const ci = document.getElementById('f-ci').value;
-        if(!n || !ci) return alert("Completa tus datos.");
+        if(!n || carrito.length === 0) return alert("Faltan datos");
 
-        // Restar Stock en la Nube
         carrito.forEach(item => {
-            const nuevoStock = item.stock - item.qty;
-            db.ref('productos/' + item.id).update({ stock: nuevoStock });
+            db.ref('productos/' + item.id).update({ stock: item.stock - item.qty });
         });
 
-        let txt = `*NUEVO PEDIDO - GABY CREATIONS*%0ACliente: ${n}%0ACI: ${ci}%0A%0A`;
-        carrito.forEach(i => txt += `- ${i.nombre} x${i.qty}%0A`);
+        let txt = `*NUEVO PEDIDO - GABY CREATIONS*%0ACliente: ${n}%0A%0A`;
+        carrito.forEach(i => txt += `- ${i.nombre} (x${i.qty})%0A`);
         txt += `%0A*TOTAL: $${document.getElementById('cart-total').innerText}*`;
         
         window.open(`https://wa.me/59894492556?text=${txt}`);
@@ -233,21 +220,26 @@
         closeModals();
     }
 
-    function authAdmin() { if(btoa(prompt("Contraseña:")) === "Z2FieTEyMw==") { document.getElementById('admin-panel').style.display='block'; renderAdminList(); } }
+    function authAdmin() { if(btoa(prompt("Clave:")) === "Z2FieTEyMw==") document.getElementById('admin-panel').style.display='block'; }
 
     function saveProduct() {
+        let url = document.getElementById('p-img').value;
+        if (url.includes("drive.google.com")) {
+            const fileId = url.split("/d/")[1].split("/")[0];
+            url = `https://lh3.googleusercontent.com/u/0/d/${fileId}`;
+        }
+
         const id = document.getElementById('p-id').value || Date.now();
-        const pData = {
+        db.ref('productos/' + id).set({
             id: parseInt(id),
             nombre: document.getElementById('p-nom').value,
             precio: parseInt(document.getElementById('p-pre').value),
             stock: parseInt(document.getElementById('p-stock').value),
             cat: document.getElementById('p-cat').value,
-            img: document.getElementById('p-img').value || "",
+            img: url,
             desc: document.getElementById('p-desc').value
-        };
-        db.ref('productos/' + id).set(pData).then(() => {
-            alert("Sincronizado ✅");
+        }).then(() => {
+            alert("Sincronizado");
             resetAdminForm();
         });
     }
@@ -257,11 +249,8 @@
         list.innerHTML = "";
         productos.forEach(p => {
             list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>${p.nombre} (Stock: ${p.stock})</span>
-                <div>
-                    <button onclick="editP(${p.id})">📝</button> 
-                    <button onclick="deleteP(${p.id})" style="color:red">🗑</button>
-                </div>
+                <span>${p.nombre} (${p.stock})</span>
+                <div><button onclick="editP(${p.id})">📝</button> <button onclick="deleteP(${p.id})">🗑</button></div>
             </div>`;
         });
     }
@@ -272,14 +261,12 @@
         document.getElementById('p-nom').value = p.nombre;
         document.getElementById('p-pre').value = p.precio;
         document.getElementById('p-stock').value = p.stock;
-        document.getElementById('p-cat').value = p.cat;
         document.getElementById('p-img').value = p.img;
         document.getElementById('p-desc').value = p.desc;
-        document.getElementById('admin-panel').scrollIntoView({behavior:'smooth'});
     }
 
     function deleteP(id) { if(confirm("¿Eliminar?")) db.ref('productos/' + id).remove(); }
-    function resetAdminForm() { document.getElementById('p-id').value=""; document.querySelectorAll('#admin-panel input, #admin-panel textarea').forEach(i=>i.value=""); }
+    function resetAdminForm() { document.querySelectorAll('#admin-panel input, #admin-panel textarea').forEach(i=>i.value=""); }
     function toggleCart() { document.getElementById('modal-carrito').style.display = 'block'; }
     function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
 </script>
