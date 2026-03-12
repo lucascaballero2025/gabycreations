@@ -10,88 +10,85 @@
 
     <style>
         :root { --principal: #2c3e50; --acento: #e67e22; --fondo: #f4f7f6; --blanco: #ffffff; --gris: #7f8c8d; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--fondo); color: var(--principal); -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--fondo); color: var(--principal); overflow-x: hidden; }
         header { background: var(--blanco); padding: 10px 5%; display: flex; flex-direction: column; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top:0; z-index: 100; }
         .header-top { display: flex; justify-content: space-between; width: 100%; align-items: center; max-width: 1200px; }
         .logo { font-family: 'Brush Script MT', cursive; font-size: 2.2rem; color: var(--acento); text-decoration: none; }
-        nav { margin-top: 15px; border-top: 1px solid #eee; width: 100%; padding-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-        nav span { cursor: pointer; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; color: var(--gris); padding: 8px 12px; border-radius: 20px; transition: 0.3s; background: #fff; border: 1px solid #eee; }
-        nav span:hover { background: var(--acento); color: white; }
-        .cart-icon { cursor: pointer; position: relative; font-size: 1.6rem; padding: 5px; }
-        .cart-count { position: absolute; top: 0; right: -5px; background: #e74c3c; color: white; font-size: 0.7rem; padding: 2px 7px; border-radius: 50%; font-weight: bold; }
-        .container { padding: 20px 5%; min-height: 80vh; max-width: 1200px; margin: auto; }
+        
+        /* Galería en Modal */
+        .slider-container { position: relative; width: 100%; max-width: 450px; aspect-ratio: 1/1; margin: auto; overflow: hidden; border-radius: 15px; background: #eee; }
+        .slider-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .slider-img.active { display: block; }
+        .nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; padding: 15px; cursor: pointer; border-radius: 50%; font-weight: bold; }
+        .prev { left: 10px; }
+        .next { right: 10px; }
+        .dots { text-align: center; margin-top: 10px; }
+        .dot { height: 8px; width: 8px; background-color: #bbb; border-radius: 50%; display: inline-block; margin: 0 4px; }
+        .dot.active { background-color: var(--acento); }
+
+        /* Estilos Base */
+        .container { padding: 20px 5%; max-width: 1200px; margin: auto; }
         .grid { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-        @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; } }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; display: flex; flex-direction: column; height: 100%; transition: 0.3s; }
+        @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); cursor: pointer; border: 1px solid #eee; height: 100%; }
         .card img { width: 100%; height: 160px; object-fit: cover; }
-        .card-info { padding: 12px; text-align: center; }
-        .modal-full { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 15px; box-sizing: border-box; }
-        .btn-back { background: #eee; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
-        .detalle-container { display: flex; flex-direction: column; gap: 20px; max-width: 1000px; margin: auto; }
-        @media (min-width: 768px) { .detalle-container { flex-direction: row; align-items: flex-start; gap: 40px; } }
-        .detalle-img { width: 100%; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); object-fit: cover; max-width: 450px; }
-        .qty-box { display: flex; align-items: center; gap: 15px; margin: 20px 0; background: #f0f0f0; padding: 10px; border-radius: 10px; width: fit-content; }
-        .btn-qty { width: 40px; height: 40px; border: none; background: var(--blanco); border-radius: 50%; cursor: pointer; font-size: 1.3rem; }
-        .btn { background: var(--acento); color: white; border: none; padding: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1.1rem; }
-        .admin-dot { position: fixed; bottom: 10px; right: 10px; width: 15px; height: 15px; background: #ccc; border-radius: 50%; opacity: 0.2; z-index: 2000; }
-        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); margin-top: 30px; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .modal-full { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 15px; }
+        .btn { background: var(--acento); color: white; border: none; padding: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; }
+        .admin-dot { position: fixed; bottom: 10px; right: 10px; width: 15px; height: 15px; background: #ccc; border-radius: 50%; opacity: 0.2; }
+        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="header-top">
-        <a href="#" onclick="renderHome()" class="logo">Gaby Creations</a>
-        <div class="cart-icon" onclick="toggleCart()">
-            🛒<span class="cart-count" id="cart-count">0</span>
-        </div>
+        <a href="#" onclick="location.reload()" class="logo">Gaby Creations</a>
+        <div onclick="toggleCart()" style="cursor:pointer; font-size: 1.5rem;">🛒<span id="cart-count">0</span></div>
     </div>
-    <nav>
-        <span onclick="filterCat('Todos')">Todos</span>
-        <span onclick="filterCat('Manualidades')">Manualidades</span>
-        <span onclick="filterCat('Tecnología')">Tecnología</span>
-        <span onclick="filterCat('Accesorios')">Accesorios</span>
-    </nav>
 </header>
 
 <div class="container" id="main-view">
-    <h2 style="text-align:center; color:#ccc; margin-top:50px;">Conectando con la nube...</h2>
+    <h3 style="text-align:center; color:#999;">Cargando catálogo...</h3>
 </div>
 
 <div id="modal-detalle" class="modal-full">
-    <button class="btn-back" onclick="closeModals()">← Volver</button>
-    <div id="detalle-content" class="detalle-container"></div>
+    <button onclick="closeModals()" style="padding:10px; margin-bottom:15px;">← Volver</button>
+    <div class="container">
+        <div class="slider-container" id="slider-box"></div>
+        <div class="dots" id="slider-dots"></div>
+        <div id="detalle-info" style="margin-top:20px;"></div>
+    </div>
 </div>
 
 <div id="modal-carrito" class="modal-full">
-    <button class="btn-back" onclick="closeModals()">← Seguir comprando</button>
-    <div style="max-width: 600px; margin: auto;">
-        <h2>Tu Carrito</h2>
+    <button onclick="closeModals()">← Seguir viendo</button>
+    <div class="container" style="max-width:500px;">
+        <h2>Tu Pedido</h2>
         <div id="cart-list"></div>
-        <h3 style="text-align: right; margin: 20px 0;">Total: $<span id="cart-total">0</span></h3>
-        <div class="form-compra">
-            <input type="text" id="f-nombre" placeholder="Nombre completo">
-            <button class="btn" onclick="sendWhatsApp()">Confirmar por WhatsApp</button>
-        </div>
+        <hr>
+        <input type="text" id="f-nombre" placeholder="Tu nombre">
+        <button class="btn" onclick="sendWhatsApp()">Enviar a WhatsApp</button>
     </div>
 </div>
 
 <div class="admin-dot" onclick="authAdmin()"></div>
+
 <div id="admin-panel" class="panel-admin container">
-    <h2>Panel Admin</h2>
+    <h2>Panel de Control</h2>
     <input type="hidden" id="p-id">
     <input type="text" id="p-nom" placeholder="Nombre">
     <input type="number" id="p-pre" placeholder="Precio ($)">
     <input type="number" id="p-stock" placeholder="Stock">
-    <select id="p-cat">
-        <option value="Manualidades">Manualidades</option>
-        <option value="Tecnología">Tecnología</option>
-        <option value="Accesorios">Accesorios</option>
-    </select>
-    <input type="text" id="p-img" placeholder="Link de imagen (Drive o Postimages)">
+    
+    <p style="margin:10px 0 5px; font-weight:bold;">Links de Fotos (Drive):</p>
+    <input type="text" class="p-img-input" placeholder="Foto 1 (Principal)">
+    <input type="text" class="p-img-input" placeholder="Foto 2 (Opcional)">
+    <input type="text" class="p-img-input" placeholder="Foto 3 (Opcional)">
+    <input type="text" class="p-img-input" placeholder="Foto 4 (Opcional)">
+    
     <textarea id="p-desc" placeholder="Descripción"></textarea>
-    <button class="btn" onclick="saveProduct()">Guardar Producto</button>
+    <button class="btn" onclick="saveProduct()">Guardar Publicación</button>
     <div id="admin-list" style="margin-top:20px;"></div>
 </div>
 
@@ -111,123 +108,111 @@
 
     let productos = [];
     let carrito = [];
-    let tempQty = 1;
+    let currentSlide = 0;
 
-    db.ref('productos').on('value', (snapshot) => {
-        const data = snapshot.val();
-        productos = data ? Object.values(data) : [];
+    db.ref('productos').on('value', (s) => {
+        productos = s.val() ? Object.values(s.val()) : [];
         renderHome();
-        if (document.getElementById('admin-panel').style.display === 'block') renderAdminList();
+        if(document.getElementById('admin-panel').style.display === 'block') renderAdminList();
     });
 
-    function renderHome(lista = productos) {
+    function renderHome() {
         const view = document.getElementById('main-view');
-        if(productos.length === 0) {
-            view.innerHTML = `<h3 style="text-align:center; color:#999; margin-top:50px;">No hay productos cargados aún.</h3>`;
-            return;
-        }
-        view.innerHTML = `<div class="grid" id="prod-grid"></div>`;
-        lista.forEach(p => {
-            view.querySelector('#prod-grid').innerHTML += `
+        view.innerHTML = `<div class="grid"></div>`;
+        productos.forEach(p => {
+            const principal = Array.isArray(p.imgs) ? p.imgs[0] : p.img;
+            view.querySelector('.grid').innerHTML += `
                 <div class="card" onclick="openDetail(${p.id})">
-                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/400?text=Gaby+Creations'">
-                    <div class="card-info">
+                    <img src="${principal}" onerror="this.src='https://via.placeholder.com/400'">
+                    <div style="padding:10px; text-align:center;">
                         <strong>${p.nombre}</strong><br>
-                        <span style="color:var(--acento); font-weight:bold">$${p.precio}</span><br>
-                        <small>Stock: ${p.stock}</small>
+                        <span style="color:var(--acento)">$${p.precio}</span>
                     </div>
                 </div>`;
         });
     }
 
-    function filterCat(cat) { cat === 'Todos' ? renderHome() : renderHome(productos.filter(p => p.cat === cat)); }
-
     function openDetail(id) {
-        const p = productos.find(x => x.id === id);
-        tempQty = 1;
+        const p = productos.find(x => x.id == id);
+        const imgs = Array.isArray(p.imgs) ? p.imgs.filter(i => i !== "") : [p.img];
+        currentSlide = 0;
+        
         document.getElementById('modal-detalle').style.display = 'block';
-        document.getElementById('detalle-content').innerHTML = `
-            <img src="${p.img}" class="detalle-img">
-            <div style="flex:1">
-                <h1>${p.nombre}</h1>
-                <p>${p.desc}</p>
-                <h2 style="color:var(--acento)">$${p.precio}</h2>
-                <p>Disponibles: ${p.stock}</p>
-                ${p.stock > 0 ? `
-                    <div class="qty-box">
-                        <button class="btn-qty" onclick="updateTempQty(-1, ${p.stock})">-</button>
-                        <b id="temp-qty-val">${tempQty}</b>
-                        <button class="btn-qty" onclick="updateTempQty(1, ${p.stock})">+</button>
-                    </div>
-                    <button class="btn" onclick="addToCart(${p.id})">Agregar al Carrito</button>
-                ` : '<h3 style="color:red">Sin Stock</h3>'}
-            </div>`;
+        
+        let sliderHtml = '';
+        let dotsHtml = '';
+        imgs.forEach((img, i) => {
+            sliderHtml += `<img src="${img}" class="slider-img ${i===0?'active':''}">`;
+            dotsHtml += `<span class="dot ${i===0?'active':''}"></span>`;
+        });
+
+        if(imgs.length > 1) {
+            sliderHtml += `<button class="nav-btn prev" onclick="changeSlide(-1, ${imgs.length})">❮</button>`;
+            sliderHtml += `<button class="nav-btn next" onclick="changeSlide(1, ${imgs.length})">❯</button>`;
+        }
+
+        document.getElementById('slider-box').innerHTML = sliderHtml;
+        document.getElementById('slider-dots').innerHTML = dotsHtml;
+        document.getElementById('detalle-info').innerHTML = `
+            <h1>${p.nombre}</h1>
+            <p>${p.desc}</p>
+            <h2 style="color:var(--acento)">$${p.precio}</h2>
+            <button class="btn" onclick="addToCart(${p.id})">Añadir al Carrito</button>
+        `;
     }
 
-    function updateTempQty(delta, max) {
-        if(tempQty + delta >= 1 && tempQty + delta <= max) {
-            tempQty += delta;
-            document.getElementById('temp-qty-val').innerText = tempQty;
-        }
+    function changeSlide(n, total) {
+        const slides = document.querySelectorAll('.slider-img');
+        const dots = document.querySelectorAll('.dot');
+        slides[currentSlide].classList.remove('active');
+        dots[currentSlide].classList.remove('active');
+        
+        currentSlide = (currentSlide + n + total) % total;
+        
+        slides[currentSlide].classList.add('active');
+        dots[currentSlide].classList.add('active');
     }
 
     function addToCart(id) {
-        const p = productos.find(x => x.id === id);
-        const exist = carrito.find(x => x.id === id);
-        if(exist) {
-            if(exist.qty + tempQty <= p.stock) exist.qty += tempQty;
-            else return alert("Stock superado");
-        } else {
-            carrito.push({...p, qty: tempQty});
-        }
-        updateCartUI();
+        const p = productos.find(x => x.id == id);
+        carrito.push(p);
+        document.getElementById('cart-count').innerText = carrito.length;
         closeModals();
     }
 
-    function updateCartUI() {
-        let total = 0, count = 0;
-        document.getElementById('cart-list').innerHTML = "";
-        carrito.forEach((item, index) => {
-            total += item.precio * item.qty;
-            count += item.qty;
-            document.getElementById('cart-list').innerHTML += `
-                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                    <span>${item.nombre} (x${item.qty})</span>
-                    <button onclick="removeItem(${index})">🗑</button>
-                </div>`;
+    function toggleCart() {
+        document.getElementById('modal-carrito').style.display = 'block';
+        const list = document.getElementById('cart-list');
+        list.innerHTML = "";
+        let total = 0;
+        carrito.forEach(i => {
+            total += i.precio;
+            list.innerHTML += `<p>${i.nombre} - $${i.precio}</p>`;
         });
-        document.getElementById('cart-count').innerText = count;
-        document.getElementById('cart-total').innerText = total;
+        list.innerHTML += `<h3>Total: $${total}</h3>`;
     }
-
-    function removeItem(i) { carrito.splice(i,1); updateCartUI(); }
 
     function sendWhatsApp() {
         const n = document.getElementById('f-nombre').value;
-        if(!n || carrito.length === 0) return alert("Faltan datos");
-
-        carrito.forEach(item => {
-            db.ref('productos/' + item.id).update({ stock: item.stock - item.qty });
-        });
-
-        let txt = `*NUEVO PEDIDO - GABY CREATIONS*%0ACliente: ${n}%0A%0A`;
-        carrito.forEach(i => txt += `- ${i.nombre} (x${i.qty})%0A`);
-        txt += `%0A*TOTAL: $${document.getElementById('cart-total').innerText}*`;
-        
-        window.open(`https://wa.me/59894492556?text=${txt}`);
-        carrito = [];
-        updateCartUI();
-        closeModals();
+        if(!n) return alert("Pon tu nombre");
+        let msg = `*Pedido Gaby Creations*%0ACliente: ${n}%0A`;
+        carrito.forEach(i => msg += `- ${i.nombre}%0A`);
+        window.open(`https://wa.me/59894492556?text=${msg}`);
     }
 
     function authAdmin() { if(btoa(prompt("Clave:")) === "Z2FieTEyMw==") document.getElementById('admin-panel').style.display='block'; }
 
     function saveProduct() {
-        let url = document.getElementById('p-img').value;
-        if (url.includes("drive.google.com")) {
-            const fileId = url.split("/d/")[1].split("/")[0];
-            url = `https://lh3.googleusercontent.com/u/0/d/${fileId}`;
-        }
+        const inputs = document.querySelectorAll('.p-img-input');
+        let imgArray = [];
+        inputs.forEach(input => {
+            let url = input.value;
+            if(url.includes("drive.google.com")) {
+                const id = url.split("/d/")[1].split("/")[0];
+                url = `https://lh3.googleusercontent.com/u/0/d/${id}`;
+            }
+            if(url) imgArray.push(url);
+        });
 
         const id = document.getElementById('p-id').value || Date.now();
         db.ref('productos/' + id).set({
@@ -235,40 +220,25 @@
             nombre: document.getElementById('p-nom').value,
             precio: parseInt(document.getElementById('p-pre').value),
             stock: parseInt(document.getElementById('p-stock').value),
-            cat: document.getElementById('p-cat').value,
-            img: url,
+            imgs: imgArray,
             desc: document.getElementById('p-desc').value
-        }).then(() => {
-            alert("Sincronizado");
-            resetAdminForm();
-        });
+        }).then(() => { alert("Guardado!"); resetForm(); });
     }
 
     function renderAdminList() {
-        const list = document.getElementById('admin-list');
-        list.innerHTML = "";
+        const l = document.getElementById('admin-list');
+        l.innerHTML = "";
         productos.forEach(p => {
-            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-                <span>${p.nombre} (${p.stock})</span>
-                <div><button onclick="editP(${p.id})">📝</button> <button onclick="deleteP(${p.id})">🗑</button></div>
+            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span>${p.nombre}</span>
+                <button onclick="deleteP(${p.id})">🗑</button>
             </div>`;
         });
     }
 
-    function editP(id) {
-        const p = productos.find(x => x.id == id);
-        document.getElementById('p-id').value = p.id;
-        document.getElementById('p-nom').value = p.nombre;
-        document.getElementById('p-pre').value = p.precio;
-        document.getElementById('p-stock').value = p.stock;
-        document.getElementById('p-img').value = p.img;
-        document.getElementById('p-desc').value = p.desc;
-    }
-
     function deleteP(id) { if(confirm("¿Eliminar?")) db.ref('productos/' + id).remove(); }
-    function resetAdminForm() { document.querySelectorAll('#admin-panel input, #admin-panel textarea').forEach(i=>i.value=""); }
-    function toggleCart() { document.getElementById('modal-carrito').style.display = 'block'; }
-    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
+    function resetForm() { document.querySelectorAll('input, textarea').forEach(i=>i.value=""); document.getElementById('admin-panel').style.display='none'; }
+    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display='none'); }
 </script>
 </body>
 </html>
