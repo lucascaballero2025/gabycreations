@@ -15,7 +15,6 @@
         .header-top { display: flex; justify-content: space-between; width: 100%; align-items: center; max-width: 1200px; }
         .logo { font-family: 'Brush Script MT', cursive; font-size: 2.2rem; color: var(--acento); text-decoration: none; }
         
-        /* Galería en Modal */
         .slider-container { position: relative; width: 100%; max-width: 450px; aspect-ratio: 1/1; margin: auto; overflow: hidden; border-radius: 15px; background: #eee; }
         .slider-img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .slider-img.active { display: block; }
@@ -26,7 +25,6 @@
         .dot { height: 8px; width: 8px; background-color: #bbb; border-radius: 50%; display: inline-block; margin: 0 4px; }
         .dot.active { background-color: var(--acento); }
 
-        /* Estilos Base */
         .container { padding: 20px 5%; max-width: 1200px; margin: auto; }
         .grid { display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
         @media (min-width: 768px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
@@ -34,9 +32,10 @@
         .card img { width: 100%; height: 160px; object-fit: cover; }
         .modal-full { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 15px; }
         .btn { background: var(--acento); color: white; border: none; padding: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; }
-        .admin-dot { position: fixed; bottom: 10px; right: 10px; width: 15px; height: 15px; background: #ccc; border-radius: 50%; opacity: 0.2; }
-        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); }
+        .admin-dot { position: fixed; bottom: 10px; right: 10px; width: 15px; height: 15px; background: #ccc; border-radius: 50%; opacity: 0.1; }
+        .panel-admin { display: none; background: #fff; padding: 20px; border-top: 5px solid var(--acento); margin-top: 20px; border-radius: 15px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
         input, select, textarea { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9f9f9; margin-bottom: 5px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -49,11 +48,11 @@
 </header>
 
 <div class="container" id="main-view">
-    <h3 style="text-align:center; color:#999;">Cargando catálogo...</h3>
+    <h3 style="text-align:center; color:#999;">Cargando catálogo de Gaby Creations...</h3>
 </div>
 
 <div id="modal-detalle" class="modal-full">
-    <button onclick="closeModals()" style="padding:10px; margin-bottom:15px;">← Volver</button>
+    <button onclick="closeModals()" style="padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;">← Volver</button>
     <div class="container">
         <div class="slider-container" id="slider-box"></div>
         <div class="dots" id="slider-dots"></div>
@@ -62,34 +61,38 @@
 </div>
 
 <div id="modal-carrito" class="modal-full">
-    <button onclick="closeModals()">← Seguir viendo</button>
+    <button onclick="closeModals()" style="padding:10px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc;">← Seguir viendo</button>
     <div class="container" style="max-width:500px;">
         <h2>Tu Pedido</h2>
         <div id="cart-list"></div>
         <hr>
-        <input type="text" id="f-nombre" placeholder="Tu nombre">
-        <button class="btn" onclick="sendWhatsApp()">Enviar a WhatsApp</button>
+        <input type="text" id="f-nombre" placeholder="Tu nombre completo">
+        <button class="btn" onclick="sendWhatsApp()">Enviar Pedido a WhatsApp</button>
     </div>
 </div>
 
 <div class="admin-dot" onclick="authAdmin()"></div>
 
 <div id="admin-panel" class="panel-admin container">
-    <h2>Panel de Control</h2>
+    <h2 id="admin-form-title">Nueva Publicación</h2>
     <input type="hidden" id="p-id">
-    <input type="text" id="p-nom" placeholder="Nombre">
+    <input type="text" id="p-nom" placeholder="Nombre del producto">
     <input type="number" id="p-pre" placeholder="Precio ($)">
-    <input type="number" id="p-stock" placeholder="Stock">
+    <input type="number" id="p-stock" placeholder="Stock disponible">
     
-    <p style="margin:10px 0 5px; font-weight:bold;">Links de Fotos (Drive):</p>
-    <input type="text" class="p-img-input" placeholder="Foto 1 (Principal)">
-    <input type="text" class="p-img-input" placeholder="Foto 2 (Opcional)">
-    <input type="text" class="p-img-input" placeholder="Foto 3 (Opcional)">
-    <input type="text" class="p-img-input" placeholder="Foto 4 (Opcional)">
+    <p style="margin:10px 0 5px; font-weight:bold; font-size: 0.9rem;">Links de Fotos (Google Drive):</p>
+    <input type="text" class="p-img-input" id="img-0" placeholder="Foto 1 (Principal)">
+    <input type="text" class="p-img-input" id="img-1" placeholder="Foto 2">
+    <input type="text" class="p-img-input" id="img-2" placeholder="Foto 3">
+    <input type="text" class="p-img-input" id="img-3" placeholder="Foto 4">
     
-    <textarea id="p-desc" placeholder="Descripción"></textarea>
-    <button class="btn" onclick="saveProduct()">Guardar Publicación</button>
-    <div id="admin-list" style="margin-top:20px;"></div>
+    <textarea id="p-desc" placeholder="Descripción del producto" rows="3"></textarea>
+    <button class="btn" id="btn-save" onclick="saveProduct()">Guardar Cambios</button>
+    <button class="btn" style="background:#7f8c8d; margin-top:5px;" onclick="resetForm()">Cancelar / Nuevo</button>
+    
+    <div id="admin-list" style="margin-top:30px; border-top: 1px solid #eee; padding-top: 20px;">
+        <h4>Gestionar Existentes:</h4>
+    </div>
 </div>
 
 <script>
@@ -111,7 +114,8 @@
     let currentSlide = 0;
 
     db.ref('productos').on('value', (s) => {
-        productos = s.val() ? Object.values(s.val()) : [];
+        const data = s.val();
+        productos = data ? Object.values(data) : [];
         renderHome();
         if(document.getElementById('admin-panel').style.display === 'block') renderAdminList();
     });
@@ -120,13 +124,13 @@
         const view = document.getElementById('main-view');
         view.innerHTML = `<div class="grid"></div>`;
         productos.forEach(p => {
-            const principal = Array.isArray(p.imgs) ? p.imgs[0] : p.img;
+            const principal = (p.imgs && p.imgs[0]) ? p.imgs[0] : "https://via.placeholder.com/400?text=Gaby+Creations";
             view.querySelector('.grid').innerHTML += `
                 <div class="card" onclick="openDetail(${p.id})">
                     <img src="${principal}" onerror="this.src='https://via.placeholder.com/400'">
                     <div style="padding:10px; text-align:center;">
                         <strong>${p.nombre}</strong><br>
-                        <span style="color:var(--acento)">$${p.precio}</span>
+                        <span style="color:var(--acento); font-weight:bold;">$${p.precio}</span>
                     </div>
                 </div>`;
         });
@@ -134,9 +138,8 @@
 
     function openDetail(id) {
         const p = productos.find(x => x.id == id);
-        const imgs = Array.isArray(p.imgs) ? p.imgs.filter(i => i !== "") : [p.img];
+        const imgs = p.imgs ? p.imgs.filter(i => i !== "") : ["https://via.placeholder.com/400"];
         currentSlide = 0;
-        
         document.getElementById('modal-detalle').style.display = 'block';
         
         let sliderHtml = '';
@@ -154,9 +157,10 @@
         document.getElementById('slider-box').innerHTML = sliderHtml;
         document.getElementById('slider-dots').innerHTML = dotsHtml;
         document.getElementById('detalle-info').innerHTML = `
-            <h1>${p.nombre}</h1>
-            <p>${p.desc}</p>
+            <h1 style="margin-bottom:5px;">${p.nombre}</h1>
+            <p style="color:var(--gris); margin-top:0;">${p.desc}</p>
             <h2 style="color:var(--acento)">$${p.precio}</h2>
+            <p><small>Stock: ${p.stock} unidades</small></p>
             <button class="btn" onclick="addToCart(${p.id})">Añadir al Carrito</button>
         `;
     }
@@ -166,9 +170,7 @@
         const dots = document.querySelectorAll('.dot');
         slides[currentSlide].classList.remove('active');
         dots[currentSlide].classList.remove('active');
-        
         currentSlide = (currentSlide + n + total) % total;
-        
         slides[currentSlide].classList.add('active');
         dots[currentSlide].classList.add('active');
     }
@@ -177,6 +179,7 @@
         const p = productos.find(x => x.id == id);
         carrito.push(p);
         document.getElementById('cart-count').innerText = carrito.length;
+        alert("¡Agregado al carrito!");
         closeModals();
     }
 
@@ -185,31 +188,37 @@
         const list = document.getElementById('cart-list');
         list.innerHTML = "";
         let total = 0;
-        carrito.forEach(i => {
+        carrito.forEach((i, idx) => {
             total += i.precio;
-            list.innerHTML += `<p>${i.nombre} - $${i.precio}</p>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span>${i.nombre}</span>
+                <b>$${i.precio}</b>
+            </div>`;
         });
-        list.innerHTML += `<h3>Total: $${total}</h3>`;
+        list.innerHTML += `<div style="text-align:right; font-size:1.4rem; margin-top:15px;">Total: <b>$${total}</b></div>`;
     }
 
     function sendWhatsApp() {
         const n = document.getElementById('f-nombre').value;
-        if(!n) return alert("Pon tu nombre");
-        let msg = `*Pedido Gaby Creations*%0ACliente: ${n}%0A`;
-        carrito.forEach(i => msg += `- ${i.nombre}%0A`);
+        if(!n || carrito.length === 0) return alert("Completa tu nombre y agrega productos.");
+        let msg = `*Pedido Gaby Creations*%0ACliente: ${n}%0A%0A`;
+        carrito.forEach(i => msg += `- ${i.nombre} ($${i.precio})%0A`);
         window.open(`https://wa.me/59894492556?text=${msg}`);
     }
 
-    function authAdmin() { if(btoa(prompt("Clave:")) === "Z2FieTEyMw==") document.getElementById('admin-panel').style.display='block'; }
+    function authAdmin() { if(btoa(prompt("Contraseña Admin:")) === "Z2FieTEyMw==") document.getElementById('admin-panel').style.display='block'; }
 
     function saveProduct() {
         const inputs = document.querySelectorAll('.p-img-input');
         let imgArray = [];
         inputs.forEach(input => {
-            let url = input.value;
+            let url = input.value.trim();
             if(url.includes("drive.google.com")) {
-                const id = url.split("/d/")[1].split("/")[0];
-                url = `https://lh3.googleusercontent.com/u/0/d/${id}`;
+                const parts = url.split("/d/");
+                if(parts[1]) {
+                    const fileId = parts[1].split("/")[0];
+                    url = `https://lh3.googleusercontent.com/u/0/d/${fileId}`;
+                }
             }
             if(url) imgArray.push(url);
         });
@@ -222,22 +231,55 @@
             stock: parseInt(document.getElementById('p-stock').value),
             imgs: imgArray,
             desc: document.getElementById('p-desc').value
-        }).then(() => { alert("Guardado!"); resetForm(); });
+        }).then(() => { 
+            alert("¡Publicación actualizada exitosamente!"); 
+            resetForm(); 
+        });
     }
 
     function renderAdminList() {
         const l = document.getElementById('admin-list');
-        l.innerHTML = "";
+        l.innerHTML = "<h4>Gestionar Existentes:</h4>";
         productos.forEach(p => {
-            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span>${p.nombre}</span>
-                <button onclick="deleteP(${p.id})">🗑</button>
+            l.innerHTML += `<div class="admin-item">
+                <span>${p.nombre} ($${p.precio})</span>
+                <div>
+                    <button onclick="editP(${p.id})" style="background:#3498db; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">📝</button>
+                    <button onclick="deleteP(${p.id})" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;">🗑</button>
+                </div>
             </div>`;
         });
     }
 
-    function deleteP(id) { if(confirm("¿Eliminar?")) db.ref('productos/' + id).remove(); }
-    function resetForm() { document.querySelectorAll('input, textarea').forEach(i=>i.value=""); document.getElementById('admin-panel').style.display='none'; }
+    function editP(id) {
+        const p = productos.find(x => x.id == id);
+        document.getElementById('admin-form-title').innerText = "Editando: " + p.nombre;
+        document.getElementById('p-id').value = p.id;
+        document.getElementById('p-nom').value = p.nombre;
+        document.getElementById('p-pre').value = p.precio;
+        document.getElementById('p-stock').value = p.stock;
+        document.getElementById('p-desc').value = p.desc;
+        
+        // Cargar imágenes
+        document.querySelectorAll('.p-img-input').forEach(i => i.value = "");
+        if(p.imgs) {
+            p.imgs.forEach((url, index) => {
+                if(document.getElementById('img-' + index)) {
+                    document.getElementById('img-' + index).value = url;
+                }
+            });
+        }
+        window.scrollTo({ top: document.getElementById('admin-panel').offsetTop, behavior: 'smooth' });
+    }
+
+    function deleteP(id) { if(confirm("¿Estás seguro de eliminar este producto para siempre?")) db.ref('productos/' + id).remove(); }
+    
+    function resetForm() { 
+        document.getElementById('admin-form-title').innerText = "Nueva Publicación";
+        document.getElementById('p-id').value = "";
+        document.querySelectorAll('#admin-panel input, #admin-panel textarea').forEach(i => i.value = "");
+    }
+
     function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display='none'); }
 </script>
 </body>
