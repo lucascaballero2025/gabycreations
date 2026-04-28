@@ -116,8 +116,7 @@
 
 <div id="modal-detalle" class="modal-full">
     <div class="container" style="max-width: 600px;">
-        <div class="admin-section" id="detalle-contenido">
-            </div>
+        <div class="admin-section" id="detalle-contenido"></div>
         <button class="btn" style="background:#444;" onclick="closeModals()">VOLVER AL CATÁLOGO</button>
     </div>
 </div>
@@ -141,29 +140,29 @@
 <div id="modal-about" class="modal-full">
     <div class="container" style="max-width: 600px;">
         <div class="admin-section">
-            <h2>👥 Quiénes Somos</h2>
             <h2 style="color:var(--accent-blue); margin-top:0;">👥 Quiénes Somos</h2>
             <p>¡Hola! Somos <strong>Lucas y Gabriela</strong>, madre e hijo unidos por este emprendimiento llamado <strong>Electro L&G</strong>.</p>
             <p>Decidimos crear este espacio para ofrecer lo mejor en productos de tecnología, pero sin perder ese toque personal que amamos: desde manualidades únicas hasta materas personalizadas.</p>
-            <p>Estamos ubicados en el <strong>Balneario El Ensueño, Santa Ana, Dpto. de Colonia, Uruguay</strong>. Creemos en la atención cercana y en que comprar por internet puede ser una experiencia divertida y cómoda.</p>
+            <p>Estamos ubicados en el <strong>Balneario El Ensueño, Santa Ana, Dpto. de Colonia, Uruguay</strong>.</p>
             <button class="btn" onclick="closeModals()">CERRAR</button>
         </div>
     </div>
 </div>
 
 <div id="modal-info" class="modal-full">
-    <div class="container" style="max-width:500px; background: var(--card-bg); padding: 30px; border-radius: 20px;">
-        <h2 style="color:var(--accent-blue); text-align:center;">🚀 Guía de Compra</h2>
-        <div style="line-height: 2;">
-            1️⃣ Elegí tu producto favorito.<br>
-            2️⃣ Seleccioná la cantidad y <b>Agregá al carrito</b>.<br>
-            3️⃣ Entrá al 🛒, poné tu nombre.<br>
-            4️⃣ Toca finalizar y te atenderemos por <b>WhatsApp</b>.
+    <div class="container" style="max-width: 500px; margin-top: 50px;">
+        <div class="admin-section">
+            <h2 style="color:var(--accent-blue); text-align:center;">🚀 Guía de Compra</h2>
+            <div style="line-height: 2;">
+                1️⃣ Elegí tu producto favorito.<br>
+                2️⃣ Seleccioná la cantidad y <b>Agregá al carrito</b>.<br>
+                3️⃣ Entrá al 🛒, revisá tu pedido.<br>
+                4️⃣ Toca finalizar y te atenderemos por <b>WhatsApp</b>.
+            </div>
+            <button class="btn" style="margin-top:25px;" onclick="closeModals()">¡ENTENDIDO!</button>
         </div>
-        <button class="btn" style="margin-top:25px;" onclick="closeModals()">¡ENTENDIDO!</button>
     </div>
 </div>
-
 
 <div id="modal-admin" class="modal-full">
     <div class="container" style="max-width: 700px;">
@@ -186,7 +185,7 @@
 <div class="admin-dot" onclick="authAdmin()"></div>
 
 <script>
-    const PHONE = "59899968118"; // Tu número
+    const PHONE = "59899968118";
     const CLOUD_NAME = 'dbhqmddxv';
     const UPLOAD_PRESET = 'fotosfotos';
 
@@ -207,7 +206,6 @@
     let carrito = [];
     let croppieInstance = null;
 
-    // --- CARGAS ---
     db.ref('tienda/logo').on('value', s => {
         document.getElementById('main-logo').src = s.val() || 'https://placehold.co/200x80/0f172a/0084ff?text=L%26G';
     });
@@ -234,17 +232,14 @@
         view.innerHTML = html + '</div>';
     }
 
-    // --- LÓGICA DE DETALLE ---
     function openDetail(index) {
         const p = productos[index];
         const content = document.getElementById('detalle-contenido');
-        
         content.innerHTML = `
             <img src="${p.imgs ? p.imgs[0] : ''}" class="detail-img">
             <h2 style="margin-top:20px">${p.nombre}</h2>
             <p class="price-tag">$${p.precio}</p>
             <p style="color:var(--text-dim)">${p.descripcion || 'Sin descripción disponible.'}</p>
-            
             <div style="margin:20px 0">
                 <label>Cantidad:</label>
                 <select id="cantidad-sel">
@@ -252,20 +247,15 @@
                 </select>
                 <p style="font-size:0.8rem; color:var(--text-dim)">Stock disponible: ${p.stock || 0}</p>
             </div>
-            
             <button class="btn" onclick="addToCart(${index})">AÑADIR AL CARRITO</button>
         `;
         document.getElementById('modal-detalle').style.display = 'block';
     }
 
-    // --- LÓGICA DE CARRITO ---
     function addToCart(index) {
         const cant = parseInt(document.getElementById('cantidad-sel').value);
         const p = productos[index];
-        
-        const item = { ...p, cantidad: cant };
-        carrito.push(item);
-        
+        carrito.push({ ...p, cantidad: cant });
         updateCartUI();
         closeModals();
         alert("¡Agregado al carrito! 🛒");
@@ -275,7 +265,6 @@
         document.getElementById('cart-count').innerText = carrito.length;
         const lista = document.getElementById('carrito-lista');
         let total = 0;
-        
         lista.innerHTML = carrito.map((item, i) => {
             total += item.precio * item.cantidad;
             return `
@@ -288,7 +277,6 @@
                 </div>
             `;
         }).join('');
-        
         document.getElementById('total-precio').innerText = `$${total}`;
     }
 
@@ -297,11 +285,13 @@
         updateCartUI();
     }
 
-    function toggleCart() { document.getElementById('modal-carrito').style.display = 'block'; }
+    function toggleCart() { closeModals(); document.getElementById('modal-carrito').style.display = 'block'; }
+    function toggleAbout() { closeModals(); document.getElementById('modal-about').style.display = 'block'; }
+    function toggleInfo() { closeModals(); document.getElementById('modal-info').style.display = 'block'; }
+    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
 
     function enviarWhatsApp() {
         if (carrito.length === 0) return alert("El carrito está vacío.");
-        
         let msg = "¡Hola Electro L&G! Quiero realizar un pedido:\n\n";
         let total = 0;
         carrito.forEach(item => {
@@ -309,21 +299,14 @@
             total += item.precio * item.cantidad;
         });
         msg += `\n*TOTAL: $${total}*`;
-        
         window.open(`https://wa.me/${PHONE}?text=${encodeURIComponent(msg)}`);
     }
 
-    // --- FUNCIONES COMUNES ---
-    function toggleAbout() { closeModals(); document.getElementById('modal-about').style.display = 'block'; }
-    function toggleInfo() { closeModals(); document.getElementById('modal-info').style.display = 'block'; }
-    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
-    
     function authAdmin() {
         const pass = prompt("Clave:");
         if (pass && btoa(pass) === "U2FjdWwyMDA0MTQu") document.getElementById('modal-admin').style.display = 'block';
     }
 
-    // (Lógica de Croppie simplificada aquí para ahorrar espacio, funciona igual que la tuya)
     function initCropper(e) {
         document.getElementById('cropper-container').style.display = 'block';
         const reader = new FileReader();
