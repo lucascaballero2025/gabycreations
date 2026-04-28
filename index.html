@@ -13,7 +13,6 @@
             --principal: #1b4332;
             --brillante: #40916c;
             --acento: #bc6c25;
-            --blanco: rgba(255, 255, 255, 0.9);
         }
 
         @keyframes fadeIn {
@@ -56,20 +55,20 @@
 
         .container { padding: 25px 5%; max-width: 1200px; margin: auto; }
         
-        input, select, textarea { 
-            width: 100%; padding: 15px; margin: 12px 0; 
+        input[type="text"], input[type="number"], textarea { 
+            width: 100%; padding: 15px; margin: 8px 0; 
             border: 2px solid rgba(27, 67, 50, 0.2); 
             border-radius: 12px; font-size: 1rem;
             background: rgba(255, 255, 255, 0.8);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
             outline: none;
+            box-sizing: border-box;
         }
-        input:focus, textarea:focus { 
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus { 
             border-color: var(--brillante); 
             background: #fff;
             box-shadow: 0 0 15px rgba(64, 145, 108, 0.3);
-            transform: scale(1.01);
         }
 
         .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); animation: fadeIn 0.8s ease; }
@@ -92,12 +91,13 @@
             transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
         }
         .btn:hover { background: var(--brillante); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .btn:disabled { background: #aaa; cursor: not-allowed; }
 
         .qty-selector { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 20px 0; background: rgba(27, 67, 50, 0.1); padding: 12px; border-radius: 50px; }
         .qty-btn { background: var(--principal); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.4rem; }
 
-        .modal-full { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 1000; overflow-y: auto; padding: 25px; }
-        .admin-dot { position: fixed; bottom: 15px; right: 15px; width: 20px; height: 20px; background: var(--principal); border-radius: 50%; opacity: 0.05; cursor: pointer; }
+        .modal-full { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); z-index: 1000; overflow-y: auto; padding: 25px; box-sizing: border-box; }
+        .admin-dot { position: fixed; bottom: 15px; right: 15px; width: 20px; height: 20px; background: var(--principal); border-radius: 50%; opacity: 0.05; cursor: pointer; z-index: 500; }
 
         /* Botón flotante WhatsApp */
         .whatsapp-float {
@@ -116,15 +116,44 @@
             text-decoration: none;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        .whatsapp-float:hover {
-            transform: scale(1.12);
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.55);
+        .whatsapp-float:hover { transform: scale(1.12); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.55); }
+        .whatsapp-float svg { width: 30px; height: 30px; fill: white; }
+
+        /* Zona de subida */
+        .upload-zone {
+            border: 2px dashed rgba(27, 67, 50, 0.35);
+            border-radius: 16px;
+            padding: 22px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(64, 145, 108, 0.04);
+            margin: 10px 0;
+            position: relative;
         }
-        .whatsapp-float svg {
-            width: 30px;
-            height: 30px;
-            fill: white;
-        }
+        .upload-zone:hover, .upload-zone.drag { border-color: var(--brillante); background: rgba(64,145,108,0.1); }
+        .upload-zone .uz-icon { font-size: 2.5rem; display: block; margin-bottom: 6px; }
+        .upload-zone .uz-text { font-size: 0.95rem; color: #555; }
+        .upload-zone .uz-sub { font-size: 0.8rem; color: #999; margin-top: 4px; }
+
+        /* Previews */
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; margin: 10px 0; }
+        .preview-item { position: relative; aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; border: 2px solid #eee; }
+        .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-item .del-img { position: absolute; top: 4px; right: 4px; background: rgba(200,0,0,0.75); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; }
+        .preview-item .uploading-overlay { position: absolute; inset: 0; background: rgba(255,255,255,0.75); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: var(--principal); font-weight: bold; }
+
+        /* Barra progreso */
+        .upload-progress { height: 6px; background: #eee; border-radius: 10px; overflow: hidden; margin: 6px 0; display: none; }
+        .upload-progress-bar { height: 100%; background: var(--brillante); width: 0%; transition: width 0.3s; border-radius: 10px; }
+
+        /* Lista admin */
+        .admin-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: #f9f9f9; margin-bottom: 8px; border-radius: 12px; }
+        .admin-item img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+        .admin-item .info { flex: 1; font-size: 0.9rem; }
+        .admin-item .info strong { display: block; }
+        .admin-item .info span { color: var(--brillante); font-weight: bold; }
+        .admin-item .btns button { background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 4px; }
     </style>
 </head>
 <body>
@@ -141,6 +170,7 @@
     <h2 style="text-align:center; color:white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Preparando el catálogo natural...</h2>
 </div>
 
+<!-- Modal: Cómo comprar -->
 <div id="modal-info" class="modal-full">
     <div class="container" style="max-width:500px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);">
         <h2 style="color:var(--principal); text-align:center;">🌿 Pasos para tu Compra</h2>
@@ -154,6 +184,7 @@
     </div>
 </div>
 
+<!-- Modal: Detalle producto -->
 <div id="modal-detalle" class="modal-full">
     <button onclick="closeModals()" style="font-size: 1.5rem; background:none; border:none; cursor:pointer;">✕ CERRAR</button>
     <div class="container" style="max-width: 800px; background: white; padding: 25px; border-radius: 25px;">
@@ -162,6 +193,7 @@
     </div>
 </div>
 
+<!-- Modal: Carrito -->
 <div id="modal-carrito" class="modal-full">
     <button onclick="closeModals()" style="font-size: 1.2rem; margin-bottom: 20px;">✕ VOLVER</button>
     <div class="container" style="max-width:500px; background: white; padding: 30px; border-radius: 25px;">
@@ -173,71 +205,100 @@
     </div>
 </div>
 
+<!-- Punto admin invisible -->
 <div class="admin-dot" onclick="authAdmin()"></div>
 
-<!-- Botón flotante de consultas por WhatsApp -->
+<!-- Botón flotante WhatsApp -->
 <a href="https://wa.me/59899968118?text=Hola%20Gaby%20Creations!%20Tengo%20una%20consulta%20%F0%9F%8C%BF"
-   target="_blank"
-   class="whatsapp-float"
-   title="Consultas por WhatsApp">
+   target="_blank" class="whatsapp-float" title="Consultas por WhatsApp">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
   </svg>
 </a>
 
+<!-- Panel Admin -->
 <div id="admin-panel" class="modal-full" style="background: #f0f4f0;">
-    <div class="container" style="max-width: 700px; background: white; padding: 30px; border-radius: 20px;">
-        <h2 id="admin-form-title">Gestionar Gaby Creations</h2>
+    <div class="container" style="max-width: 680px; background: white; padding: 30px; border-radius: 20px;">
+
+        <h2 id="admin-form-title" style="color:var(--principal); margin-top:0;">➕ Nuevo Producto</h2>
+
         <input type="hidden" id="p-id">
-        <input type="text" id="p-nom" placeholder="Nombre del Producto">
-        <input type="number" id="p-pre" placeholder="Precio ($)">
-        <input type="number" id="p-stock" placeholder="Cantidad de Stock">
-        <input type="text" class="p-img-input" id="img-0" placeholder="Link de Drive 1">
-        <input type="text" class="p-img-input" id="img-1" placeholder="Link de Drive 2">
-        <input type="text" class="p-img-input" id="img-2" placeholder="Link de Drive 3">
-        <input type="text" class="p-img-input" id="img-3" placeholder="Link de Drive 4">
-        <textarea id="p-desc" placeholder="Descripción breve..."></textarea>
-        <button class="btn" onclick="saveProduct()">GUARDAR CAMBIOS</button>
-        <button class="btn" style="background:gray; margin-top:10px;" onclick="closeModals()">CERRAR PANEL</button>
+        <input type="text" id="p-nom" placeholder="📦 Nombre del producto">
+        <input type="number" id="p-pre" placeholder="💵 Precio ($)">
+        <input type="number" id="p-stock" placeholder="📊 Stock disponible">
+        <textarea id="p-desc" placeholder="📝 Descripción del producto..." rows="3" style="resize:vertical;"></textarea>
+
+        <!-- Zona de fotos -->
+        <p style="margin: 14px 0 4px; font-weight: bold; color: var(--principal);">📸 Fotos del producto (máx. 4)</p>
+        <div class="upload-zone" id="upload-zone">
+            <input type="file" id="foto-input" accept="image/*" multiple
+                   style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;"
+                   onchange="handleFiles(this.files)">
+            <span class="uz-icon">🖼️</span>
+            <div class="uz-text"><b>Tocá aquí para elegir fotos</b></div>
+            <div class="uz-sub">Seleccioná hasta 4 imágenes desde tu galería o cámara</div>
+        </div>
+
+        <div class="upload-progress" id="upload-progress">
+            <div class="upload-progress-bar" id="upload-progress-bar"></div>
+        </div>
+
+        <div class="preview-grid" id="preview-grid"></div>
+
+        <button class="btn" id="btn-guardar" onclick="saveProduct()" style="margin-top:16px;">💾 GUARDAR PRODUCTO</button>
+        <button class="btn" onclick="resetAdminForm()" style="background:#40916c; margin-top:8px;">🔄 LIMPIAR FORMULARIO</button>
+        <button class="btn" onclick="closeModals()" style="background:#999; margin-top:8px;">✕ CERRAR PANEL</button>
+
         <div id="admin-list" style="margin-top:30px;"></div>
     </div>
 </div>
 
 <script>
+    const CLOUD_NAME    = 'dbhqmddxv';
+    const UPLOAD_PRESET = 'fotosfotos';
+
     const firebaseConfig = {
-      apiKey: "AIzaSyCJI7RSjcJU0Ipvw7ZlKo-GMpAyDGkcgKQ",
-      authDomain: "gaby-creations.firebaseapp.com",
-      databaseURL: "https://gaby-creations-default-rtdb.firebaseio.com",
-      projectId: "gaby-creations",
-      storageBucket: "gaby-creations.firebasestorage.app",
-      messagingSenderId: "775285506565",
-      appId: "1:775285506565:web:8810e1d518fbaf62ead26c"
+        apiKey: "AIzaSyCJI7RSjcJU0Ipvw7ZlKo-GMpAyDGkcgKQ",
+        authDomain: "gaby-creations.firebaseapp.com",
+        databaseURL: "https://gaby-creations-default-rtdb.firebaseio.com",
+        projectId: "gaby-creations",
+        storageBucket: "gaby-creations.firebasestorage.app",
+        messagingSenderId: "775285506565",
+        appId: "1:775285506565:web:8810e1d518fbaf62ead26c"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let productos = [];
-    let carrito = [];
+    let productos    = [];
+    let carrito      = [];
     let currentSlide = 0;
-    let selectedQty = 1;
+    let selectedQty  = 1;
+    let uploadedImgs = [];   // URLs ya subidas a Cloudinary
 
     db.ref('productos').on('value', (s) => {
         productos = s.val() ? Object.values(s.val()) : [];
         renderHome();
     });
 
+    // ════════════════════════════
+    //  CATÁLOGO
+    // ════════════════════════════
     function renderHome() {
         const view = document.getElementById('main-view');
-        view.innerHTML = `<div class="grid"></div>`;
+        if (!productos.length) {
+            view.innerHTML = '<h2 style="text-align:center;color:white;text-shadow:2px 2px 4px rgba(0,0,0,0.5);">¡Pronto habrá productos! 🌿</h2>';
+            return;
+        }
+        view.innerHTML = '<div class="grid"></div>';
         productos.forEach(p => {
             const img = (p.imgs && p.imgs[0]) ? p.imgs[0] : 'https://via.placeholder.com/400';
             view.querySelector('.grid').innerHTML += `
                 <div class="card" onclick="openDetail(${p.id})">
-                    <img src="${img}">
-                    <div style="padding:15px; text-align:center;">
+                    <img src="${img}" loading="lazy">
+                    <div style="padding:15px;text-align:center;">
                         <strong>${p.nombre}</strong><br>
-                        <span style="color:var(--principal); font-weight:bold;">$${p.precio}</span>
+                        <span style="color:var(--principal);font-weight:bold;">$${p.precio}</span>
                     </div>
                 </div>`;
         });
@@ -247,28 +308,25 @@
         const p = productos.find(x => x.id == id);
         selectedQty = 1; currentSlide = 0;
         document.getElementById('modal-detalle').style.display = 'block';
-        
+        const imgs = (p.imgs || []).filter(i => i);
         let sliderHtml = '';
-        p.imgs.filter(i => i).forEach((img, i) => {
-            sliderHtml += `<img src="${img}" class="slider-img" style="width:100%; height:100%; object-fit:cover; position:absolute; display:${i===0?'block':'none'}" id="slide-${i}">`;
+        imgs.forEach((img, i) => {
+            sliderHtml += `<img src="${img}" style="width:100%;height:100%;object-fit:cover;position:absolute;display:${i===0?'block':'none'}" id="slide-${i}">`;
         });
-        
-        if(p.imgs.length > 1) {
-            sliderHtml += `<button onclick="moveSlide(-1, ${p.imgs.length})" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.7); border:none; border-radius:50%; width:40px; height:40px; cursor:pointer;">❮</button>`;
-            sliderHtml += `<button onclick="moveSlide(1, ${p.imgs.length})" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.7); border:none; border-radius:50%; width:40px; height:40px; cursor:pointer;">❯</button>`;
+        if (imgs.length > 1) {
+            sliderHtml += `<button onclick="moveSlide(-1,${imgs.length})" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.7);border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;">❮</button>`;
+            sliderHtml += `<button onclick="moveSlide(1,${imgs.length})" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.7);border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;">❯</button>`;
         }
-
         document.getElementById('slider-box').innerHTML = sliderHtml;
         document.getElementById('detalle-info').innerHTML = `
             <h1 style="color:var(--principal)">${p.nombre}</h1>
             <p>${p.desc}</p>
             <div class="qty-selector">
-                <button class="qty-btn" onclick="updQty(-1, ${p.stock})">-</button>
+                <button class="qty-btn" onclick="updQty(-1,${p.stock})">-</button>
                 <b id="v-qty" style="font-size:1.5rem">${selectedQty}</b>
-                <button class="qty-btn" onclick="updQty(1, ${p.stock})">+</button>
+                <button class="qty-btn" onclick="updQty(1,${p.stock})">+</button>
             </div>
-            <button class="btn" onclick="addCart(${p.id})">AGREGAR $${p.precio * selectedQty}</button>
-        `;
+            <button class="btn" onclick="addCart(${p.id})">AGREGAR $${p.precio * selectedQty}</button>`;
     }
 
     function moveSlide(n, total) {
@@ -278,7 +336,7 @@
     }
 
     function updQty(n, max) {
-        if(selectedQty + n >= 1 && selectedQty + n <= max) {
+        if (selectedQty + n >= 1 && selectedQty + n <= max) {
             selectedQty += n;
             document.getElementById('v-qty').innerText = selectedQty;
         }
@@ -298,19 +356,23 @@
         list.innerHTML = ""; let tot = 0;
         carrito.forEach((i, idx) => {
             const sub = i.precio * i.cant; tot += sub;
-            list.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px solid #eee; padding:5px;">
+            list.innerHTML += `<div style="display:flex;justify-content:space-between;margin-bottom:10px;border-bottom:1px solid #eee;padding:5px;">
                 <span>${i.nombre} (x${i.cant})</span>
-                <b>$${sub} <span onclick="remCart(${idx})" style="color:red; cursor:pointer; margin-left:10px;">✕</span></b>
+                <b>$${sub} <span onclick="remCart(${idx})" style="color:red;cursor:pointer;margin-left:10px;">✕</span></b>
             </div>`;
         });
         document.getElementById('cart-total').innerText = "Total: $" + tot;
     }
 
-    function remCart(i) { carrito.splice(i, 1); toggleCart(); document.getElementById('cart-count').innerText = carrito.length; }
+    function remCart(i) {
+        carrito.splice(i, 1);
+        toggleCart();
+        document.getElementById('cart-count').innerText = carrito.length;
+    }
 
     function sendWhatsApp() {
         const n = document.getElementById('f-nombre').value;
-        if(!n || carrito.length === 0) return alert("Pon tu nombre");
+        if (!n || carrito.length === 0) return alert("Pon tu nombre");
         let msg = `*Pedido Gaby Creations*%0ACliente: ${n}%0A%0A`;
         let tot = 0;
         carrito.forEach(i => {
@@ -323,62 +385,172 @@
         carrito = []; closeModals();
     }
 
+    // ════════════════════════════
+    //  ADMIN
+    // ════════════════════════════
     function authAdmin() {
-        if(btoa(prompt("Admin Key:")) === "U2FjdWwyMDA0MTQu") {
+        if (btoa(prompt("Admin Key:")) === "U2FjdWwyMDA0MTQu") {
             document.getElementById('admin-panel').style.display = 'block';
             renderAdmin();
         }
     }
 
-    function saveProduct() {
-        const imgs = [];
-        document.querySelectorAll('.p-img-input').forEach(input => {
-            let url = input.value.trim();
-            if(url.includes("drive.google.com")) {
-                const parts = url.split("/d/");
-                if(parts[1]) {
-                    const id = parts[1].split("/")[0];
-                    url = `https://lh3.googleusercontent.com/d/${id}`;
-                }
+    function resetAdminForm() {
+        document.getElementById('p-id').value = '';
+        document.getElementById('p-nom').value = '';
+        document.getElementById('p-pre').value = '';
+        document.getElementById('p-stock').value = '';
+        document.getElementById('p-desc').value = '';
+        document.getElementById('admin-form-title').innerText = '➕ Nuevo Producto';
+        uploadedImgs = [];
+        renderPreviews();
+    }
+
+    // ── Subida a Cloudinary ──
+    async function uploadToCloudinary(file) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', UPLOAD_PRESET);
+        const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.secure_url) return data.secure_url;
+        throw new Error(data.error?.message || 'Error al subir');
+    }
+
+    async function handleFiles(files) {
+        const available = 4 - uploadedImgs.filter(u => u !== null).length;
+        if (available <= 0) { alert('Máximo 4 fotos por producto'); return; }
+        const toUpload = Array.from(files).slice(0, available);
+
+        const progress = document.getElementById('upload-progress');
+        const bar      = document.getElementById('upload-progress-bar');
+        const btn      = document.getElementById('btn-guardar');
+        progress.style.display = 'block';
+        bar.style.width = '0%';
+        btn.disabled = true;
+        btn.innerText = '⏳ Subiendo fotos...';
+
+        for (let i = 0; i < toUpload.length; i++) {
+            const idx = uploadedImgs.length;
+            uploadedImgs.push(null);          // placeholder
+            renderPreviews();
+            try {
+                uploadedImgs[idx] = await uploadToCloudinary(toUpload[i]);
+            } catch(e) {
+                uploadedImgs.splice(idx, 1);
+                alert('Error subiendo foto: ' + e.message);
             }
-            if(url) imgs.push(url);
+            bar.style.width = ((i + 1) / toUpload.length * 100) + '%';
+            renderPreviews();
+        }
+
+        progress.style.display = 'none';
+        btn.disabled = false;
+        btn.innerText = '💾 GUARDAR PRODUCTO';
+        document.getElementById('foto-input').value = '';
+    }
+
+    function renderPreviews() {
+        const grid = document.getElementById('preview-grid');
+        grid.innerHTML = '';
+        uploadedImgs.forEach((url, i) => {
+            if (url === null) {
+                grid.innerHTML += `<div class="preview-item">
+                    <div class="uploading-overlay">⏳<br>Subiendo</div>
+                </div>`;
+            } else {
+                grid.innerHTML += `<div class="preview-item">
+                    <img src="${url}">
+                    <button class="del-img" onclick="removeImg(${i})">✕</button>
+                </div>`;
+            }
         });
+        if (uploadedImgs.length < 4) {
+            grid.innerHTML += `<div class="preview-item"
+                onclick="document.getElementById('foto-input').click()"
+                style="background:#f5f5f5;display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px dashed #ccc;">
+                <span style="font-size:2rem;color:#aaa;">+</span>
+            </div>`;
+        }
+    }
+
+    function removeImg(idx) {
+        uploadedImgs.splice(idx, 1);
+        renderPreviews();
+    }
+
+    function saveProduct() {
+        const nombre = document.getElementById('p-nom').value.trim();
+        const precio = document.getElementById('p-pre').value;
+        const stock  = document.getElementById('p-stock').value;
+        const desc   = document.getElementById('p-desc').value.trim();
+
+        if (!nombre || !precio || !stock)      return alert('Completá nombre, precio y stock');
+        if (uploadedImgs.length === 0)          return alert('Agregá al menos una foto 📸');
+        if (uploadedImgs.includes(null))        return alert('Esperá a que terminen de subir las fotos');
 
         const id = document.getElementById('p-id').value || Date.now();
         db.ref('productos/' + id).set({
             id: parseInt(id),
-            nombre: document.getElementById('p-nom').value,
-            precio: parseInt(document.getElementById('p-pre').value),
-            stock: parseInt(document.getElementById('p-stock').value),
-            imgs: imgs,
-            desc: document.getElementById('p-desc').value
-        }).then(() => { alert("Sincronizado 🍃"); closeModals(); });
+            nombre, precio: parseInt(precio),
+            stock: parseInt(stock),
+            imgs: uploadedImgs,
+            desc
+        }).then(() => {
+            alert('¡Producto guardado! 🍃');
+            resetAdminForm();
+            renderAdmin();
+        });
     }
 
     function renderAdmin() {
         const l = document.getElementById('admin-list');
-        l.innerHTML = "<h4>Existentes:</h4>";
+        l.innerHTML = '<h3 style="color:var(--principal)">Productos existentes</h3>';
+        if (!productos.length) { l.innerHTML += '<p style="color:#999">No hay productos todavía.</p>'; return; }
         productos.forEach(p => {
-            l.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; background:#f9f9f9; margin-bottom:5px; border-radius:10px;">
-                <span>${p.nombre}</span>
-                <div><button onclick="editP(${p.id})">📝</button> <button onclick="delP(${p.id})">🗑️</button></div>
+            const img = (p.imgs && p.imgs[0]) ? p.imgs[0] : 'https://via.placeholder.com/50';
+            l.innerHTML += `<div class="admin-item">
+                <img src="${img}">
+                <div class="info">
+                    <strong>${p.nombre}</strong>
+                    <span>$${p.precio} · Stock: ${p.stock}</span>
+                </div>
+                <div class="btns">
+                    <button onclick="editP(${p.id})" title="Editar">📝</button>
+                    <button onclick="delP(${p.id})" title="Borrar">🗑️</button>
+                </div>
             </div>`;
         });
     }
 
     function editP(id) {
         const p = productos.find(x => x.id == id);
-        document.getElementById('p-id').value = p.id;
-        document.getElementById('p-nom').value = p.nombre;
-        document.getElementById('p-pre').value = p.precio;
+        document.getElementById('p-id').value    = p.id;
+        document.getElementById('p-nom').value   = p.nombre;
+        document.getElementById('p-pre').value   = p.precio;
         document.getElementById('p-stock').value = p.stock;
-        document.getElementById('p-desc').value = p.desc;
-        p.imgs.forEach((u, i) => document.getElementById('img-'+i).value = u);
+        document.getElementById('p-desc').value  = p.desc;
+        document.getElementById('admin-form-title').innerText = '✏️ Editando: ' + p.nombre;
+        uploadedImgs = [...(p.imgs || [])];
+        renderPreviews();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function delP(id) { if(confirm("¿Borrar?")) db.ref('productos/' + id).remove(); }
-    function toggleInfo() { document.getElementById('modal-info').style.display = 'block'; }
-    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display='none'); }
+    function delP(id) {
+        if (confirm("¿Borrar este producto?")) db.ref('productos/' + id).remove();
+    }
+
+    // Drag & drop
+    const uz = document.getElementById('upload-zone');
+    uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag'); });
+    uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
+    uz.addEventListener('drop', e => {
+        e.preventDefault(); uz.classList.remove('drag');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    function toggleInfo()  { document.getElementById('modal-info').style.display = 'block'; }
+    function closeModals() { document.querySelectorAll('.modal-full').forEach(m => m.style.display = 'none'); }
 </script>
 </body>
 </html>
