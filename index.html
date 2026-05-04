@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     
-    <!-- Croppie para el Logo -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
@@ -120,7 +119,6 @@
     <h2 style="text-align:center; color:var(--text-dim); margin-top: 50px;">Cargando catálogo...</h2>
 </div>
 
-<!-- Modales -->
 <div id="modal-detalle" class="modal-full">
     <div class="container" style="max-width: 600px;">
         <div class="admin-section" id="detalle-contenido"></div>
@@ -309,11 +307,12 @@
             
             const newKey = db.ref('productos').push().key;
             await db.ref('productos/' + newKey).set({
-                nombre, precio: parseInt(precio), stock: parseInt(stock) || 0, descripcion: desc, imgs: [data.secure_url]
+                nombre, precio: parseInt(precio), stock: parseInt(stock) || 0, desc: desc, imgs: [data.secure_url]
             });
             alert("Producto agregado");
             document.getElementById('prod-nombre').value = '';
             document.getElementById('prod-img').value = '';
+            document.getElementById('prod-desc').value = '';
         } catch (e) { alert("Error al subir"); }
         btn.disabled = false; btn.innerText = "PUBLICAR";
     }
@@ -323,8 +322,9 @@
         const nNombre = prompt("Nombre:", p.nombre);
         const nPrecio = prompt("Precio:", p.precio);
         const nStock = prompt("Stock:", p.stock);
+        const nDesc = prompt("Descripción:", p.desc || "");
         if(nNombre && nPrecio && nStock) {
-            db.ref('productos/' + key).update({ nombre: nNombre, precio: parseInt(nPrecio), stock: parseInt(nStock) });
+            db.ref('productos/' + key).update({ nombre: nNombre, precio: parseInt(nPrecio), stock: parseInt(nStock), desc: nDesc });
         }
     }
 
@@ -338,7 +338,7 @@
             <img src="${p.imgs ? p.imgs[0] : ''}" class="detail-img">
             <h2 style="margin-top:20px">${p.nombre}</h2>
             <p class="price-tag">$${p.precio}</p>
-            <p style="color:var(--text-dim)">${p.descripcion || 'Sin descripción.'}</p>
+            <p style="color:var(--text-dim)">${p.desc || 'Sin descripción.'}</p>
             <select id="cantidad-sel">${Array.from({length: Math.min(p.stock, 10)}, (_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}</select>
             <button class="btn" onclick="addToCart('${key}')" ${p.stock <= 0 ? 'disabled' : ''}>${p.stock > 0 ? 'AÑADIR AL CARRITO' : 'SIN STOCK'}</button>
         `;
